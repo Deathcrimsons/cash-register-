@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cash Register</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 80%;
+            margin: auto;
+            max-width: 500px;
+        }
+        input, button {
+            margin: 5px;
+            padding: 10px;
+            width: 90%;
+        }
+        table {
+            width: 100%;
+            margin-top: 10px;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+        th {
+            background-color: #f4f4f4;
+        }
+        .totals, .payment {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Cash Register</h1>
+
+        <div>
+            <input type="text" id="item-name" placeholder="Item Name">
+            <input type="number" id="item-price" placeholder="Price">
+            <input type="number" id="item-quantity" placeholder="Quantity">
+            <button onclick="addItem()">Add Item</button>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Item</th>
+                    <th>Price</th>
+                    <th>Qty</th>
+                    <th>Total</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="cart-items"></tbody>
+        </table>
+
+        <div class="totals">
+            <p>Subtotal: ₱<span id="subtotal">0.00</span></p>
+            <p>Tax (10%): ₱<span id="tax">0.00</span></p>
+            <p><strong>Total: ₱<span id="total">0.00</span></strong></p>
+        </div>
+
+        <div class="payment">
+            <input type="number" id="cash-received" placeholder="Cash Received">
+            <button onclick="processPayment()">Pay</button>
+            <p>Change: ₱<span id="change">0.00</span></p>
+        </div>
+    </div>
+
+    <script>
+        let cart = [];
+
+        function addItem() {
+            let name = document.getElementById("item-name").value.trim();
+            let price = parseFloat(document.getElementById("item-price").value);
+            let quantity = parseInt(document.getElementById("item-quantity").value);
+
+            if (!name || isNaN(price) || isNaN(quantity) || price <= 0 || quantity <= 0) {
+                alert("Please enter valid item details!");
+                return;
+            }
+
+            cart.push({ name, price, quantity });
+            updateCart();
+            
+            // Clear input fields
+            document.getElementById("item-name").value = "";
+            document.getElementById("item-price").value = "";
+            document.getElementById("item-quantity").value = "";
+        }
+
+        function updateCart() {
+            let cartTable = document.getElementById("cart-items");
+            cartTable.innerHTML = "";
+
+            let subtotal = 0;
+
+            cart.forEach((item, index) => {
+                let total = item.price * item.quantity;
+                subtotal += total;
+
+                let row = `<tr>
+                    <td>${item.name}</td>
+                    <td>₱${item.price.toFixed(2)}</td>
+                    <td>${item.quantity}</td>
+                    <td>₱${total.toFixed(2)}</td>
+                    <td><button onclick="removeItem(${index})">Remove</button></td>
+                </tr>`;
+                cartTable.innerHTML += row;
+            });
+
+            let tax = subtotal * 0.10;
+            let total = subtotal + tax;
+
+            document.getElementById("subtotal").innerText = subtotal.toFixed(2);
+            document.getElementById("tax").innerText = tax.toFixed(2);
+            document.getElementById("total").innerText = total.toFixed(2);
+        }
+
+        function removeItem(index) {
+            cart.splice(index, 1);
+            updateCart();
+        }
+
+        function processPayment() {
+            let cashReceived = parseFloat(document.getElementById("cash-received").value);
+            let total = parseFloat(document.getElementById("total").innerText);
+
+            if (isNaN(cashReceived) || cashReceived < total) {
+                alert("Insufficient cash received!");
+                return;
+            }
+
+            let change = cashReceived - total;
+            document.getElementById("change").innerText = change.toFixed(2);
+            alert("Payment successful! Change: ₱" + change.toFixed(2));
+
+            // Reset cart
+            cart = [];
+            updateCart();
+            document.getElementById("cash-received").value = "";
+        }
+    </script>
+
+</body>
+</html>
